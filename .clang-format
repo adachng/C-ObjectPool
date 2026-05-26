@@ -1,0 +1,166 @@
+---
+AccessModifierOffset: -2
+UseTab: Never
+IndentWidth: 4
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: None
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+LineEnding: LF
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+InsertTrailingCommas: Wrapped
+IndentWrappedFunctionNames: true
+InsertNewlineAtEOF: false
+AllowShortIfStatementsOnASingleLine: Never
+IndentCaseLabels: true
+InsertBraces: false
+ColumnLimit: 80
+BreakBeforeBraces: Allman
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
+SpaceInEmptyBlock: true
+SpaceBeforeSquareBrackets: false
+SpaceBeforeRangeBasedForLoopColon: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInContainerLiterals: true
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+SpacesInParens: Never
+SpacesInSquareBrackets: false
+WrapNamespaceBodyWithEmptyLines: Always
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterForeachMacros: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterIfMacros: true
+  AfterNot: true
+  AfterOverloadedOperator: false
+  AfterPlacementOperator: false
+  BeforeNonEmptyParentheses: false
+  AfterRequiresInExpression: false
+  AfterRequiresInClause: false
+SpaceBeforeJsonColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeCtorInitializerColon: true
+SortJavaStaticImport: After
+SortUsingDeclarations: Lexicographic
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterOperatorKeyword: false
+SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Default
+SkipMacroDefinitionBody: false
+ShortNamespaceLines: 0
+FixNamespaceComments: true
+SeparateDefinitionBlocks: Always
+RequiresExpressionIndentation: OuterScope
+RequiresClausePosition: WithPreceding
+RemoveSemicolon: false
+RemoveParentheses: Leave
+RemoveEmptyLinesInUnwrappedLines: true
+RemoveBracesLLVM: false
+ReflowComments: Always
+ReferenceAlignment: Pointer
+PointerAlignment: Left
+QualifierAlignment: Leave
+PackConstructorInitializers: Never
+NamespaceIndentation: None
+MaxEmptyLinesToKeep: 1
+MainIncludeChar: Quote
+LambdaBodyIndentation: Signature
+KeepFormFeed: false
+JavaScriptWrapImports: true
+JavaScriptQuotes: Single
+IndentRequiresClause: true
+IndentPPDirectives: BeforeHash
+IndentGotoLabels: false
+IndentExternBlock: NoIndent
+IndentExportBlock: false
+IndentCaseBlocks: true
+IndentAccessModifiers: false
+IncludeBlocks: Preserve
+EnumTrailingComma: Leave
+EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier: Never
+DisableFormat: false
+DerivePointerAlignment: false
+Cpp11BracedListStyle: true
+CompactNamespaces: false
+BreakTemplateDeclarations: Yes
+BreakStringLiterals: true
+BreakInheritanceList: AfterComma
+BreakFunctionDefinitionParameters: false
+BreakConstructorInitializers: AfterColon
+BreakBeforeTernaryOperators: true
+BreakBeforeTemplateCloser: false
+BreakBeforeInlineASMColon: Always
+BreakBeforeConceptDeclarations: Always
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+AllowShortBlocksOnASingleLine: Always
+BreakAfterJavaFieldAnnotations: true
+BreakAfterAttributes: Always
+BreakAdjacentStringLiterals: true
+BinPackParameters: AlwaysOnePerLine
+BinPackArguments: false
+BinPackLongBracedList: false
+BitFieldColonSpacing: Both
+AlignTrailingComments:
+  OverEmptyLines: 0
+  Kind: Always
+AlignOperands: Align
+AlignEscapedNewlines: LeftWithLastLine
+AlwaysBreakBeforeMultilineStrings: false
+AllowShortNamespacesOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortLambdasOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortEnumsOnASingleLine: false
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseExpressionOnASingleLine: false
+AllowBreakBeforeNoexceptSpecifier: Never
+AlignConsecutiveTableGenDefinitionColons:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveTableGenCondOperatorColons:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveTableGenBreakingDAGArgColons:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCaseArrows: true
+  AlignCaseColons: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignFunctionDeclarations: true
+  AlignFunctionPointers: true
+  PadOperators: false
