@@ -69,19 +69,7 @@ struct ObjectPool*
 
     struct ObjectPool* const ret_p = malloc(sizeof(struct ObjectPool));
 
-    // Allocate temporary pointer array to help assemble linked list:
-    struct PooledObject** const tmp_p_arr =
-        malloc(capacity * sizeof(struct PooledObject*)); // array of pointers
-
-    if (tmp_p_arr != NULL)
-    {
-        for (size_t i = 0; i < capacity * sizeof(struct PooledObject*); i++)
-        {
-            tmp_p_arr[i] = NULL;
-        }
-    }
-
-    if (tmp_p_arr == NULL || shared_prop_p == NULL || ret_p == NULL)
+    if (shared_prop_p == NULL || ret_p == NULL)
     {
         goto bad_return;
     }
@@ -110,57 +98,63 @@ struct ObjectPool*
         .size          = capacity,
     };
 
-    // Memory allocations for the pooled objects:
-    for (size_t i = 0; i < capacity; i++)
+    // Memory allocations for the pooled objects linked list:
     {
-        tmp_p_arr[i] = malloc(sizeof(struct PooledObject));
-        if (tmp_p_arr[i] == NULL)
+        struct PooledObject* prev_p = NULL;
+        for (size_t i = 0; i < capacity; i++)
         {
-            goto bad_return;
-        }
+            struct PooledObject* const current_p =
+                malloc(sizeof(struct PooledObject));
+            if (current_p == NULL)
+            {
+                goto bad_return;
+            }
 
-        *tmp_p_arr[i] = (struct PooledObject){
-            .shared_prop_p    = shared_prop_p,
-            .next_p           = NULL,
-            .underlying_obj_p = obj_new_cb(arg_p, tmp_p_arr[i]),
-            .is_in_pool       = true,
-        };
-        shared_prop_p->ref_count++;
+            *current_p = (struct PooledObject){
+                .shared_prop_p    = shared_prop_p,
+                .next_p           = NULL,
+                .underlying_obj_p = obj_new_cb(arg_p, current_p),
+                .is_in_pool       = true,
+            };
 
-        if (tmp_p_arr[i]->underlying_obj_p == NULL)
-        {
-            goto bad_return;
+            shared_prop_p->ref_count++;
+            if (current_p->underlying_obj_p == NULL)
+            {
+                // Allocation of underlying object failed:
+                goto bad_return;
+            }
+
+            if (i > 0)
+            {
+                assert(prev_p != NULL);
+                prev_p->next_p = current_p;
+            }
+            else
+            {
+                ret_p->head_p = current_p;
+            }
+
+            prev_p = current_p;
         }
     }
 
     assert(shared_prop_p->ref_count == capacity + 1);
 
-    // Link up the linked list elements:
-    assert(capacity > 1);
-    for (size_t i = 0; i < capacity - 1; i++)
-    {
-        struct PooledObject* const left_p  = tmp_p_arr[i];
-        struct PooledObject* const right_p = tmp_p_arr[i + 1];
-
-        left_p->next_p = right_p;
-    }
-
-    ret_p->head_p = tmp_p_arr[0];
-    free(tmp_p_arr); // TODO: remove the need for tmp_p_arr
-
     return ret_p;
 bad_return:
     free(shared_prop_p);
-    free(ret_p);
-    for (size_t i = 0; i < capacity * sizeof(struct PooledObject*); i++)
+
+    struct PooledObject* current_p = ret_p->head_p;
+    while (current_p != NULL)
     {
-        if (tmp_p_arr[i] != NULL)
-        {
-            obj_free_cb(tmp_p_arr[i]->underlying_obj_p);
-        }
-        free(tmp_p_arr[i]);
+        struct PooledObject* const tmp_p = current_p;
+        current_p                        = current_p->next_p;
+
+        obj_free_cb(tmp_p->underlying_obj_p);
+        free(tmp_p);
     }
-    free(tmp_p_arr);
+
+    free(ret_p);
     return NULL;
 }
 
