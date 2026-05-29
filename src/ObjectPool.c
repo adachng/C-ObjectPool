@@ -9,8 +9,8 @@ struct poolStateFlyweight
 {
     struct ObjectPoolOptArgs additional_cbs;
     void                     (*free_cb)(void* self_p);
-    struct ObjectPool*       origin_p; // set to NULL if object pool is freed
-    size_t                   ref_count;
+    struct ObjectPool* owner_pool_p; // set to NULL if object pool is freed
+    size_t             ref_count;
 };
 
 static struct poolStateFlyweight*
@@ -102,7 +102,7 @@ struct ObjectPool*
     // Assign values to the shared properties flyweight:
     *shared_prop_p = (struct poolStateFlyweight){
         .free_cb  = obj_free_cb,
-        .origin_p = ret_p,
+        .owner_pool_p = ret_p,
         .additional_cbs =
             optional_callbacks_p == NULL
                 ? (struct ObjectPoolOptArgs){.on_acquire_cb = NULL,
@@ -195,9 +195,9 @@ void ObjectPool_free(struct ObjectPool* const self_p)
     assert(self_p->shared_prop_p->ref_count > 0);
     assert(self_p->shared_prop_p->free_cb != NULL);
 
-    // Set the origin_p to NULL in the flyweight to signify that the object pool
-    // has been freed to prevent use-after-free:
-    self_p->shared_prop_p->origin_p = NULL;
+    // Set the owner_pool_p to NULL in the flyweight to signify that the object
+    // pool has been freed to prevent use-after-free:
+    self_p->shared_prop_p->owner_pool_p = NULL;
 
     // Decrement the reference count, since the object pool is freed:
     struct poolStateFlyweight* shared_prop_p = self_p->shared_prop_p;
@@ -290,7 +290,7 @@ void PoolSlot_release(struct PoolSlot* const self_p)
             self_p->pooled_obj_p);
     }
 
-    if (self_p->shared_prop_p->origin_p == NULL)
+    if (self_p->shared_prop_p->owner_pool_p == NULL)
     {
         // Object pool is freed, free instead of release into NULL:
         self_p->shared_prop_p->free_cb(self_p->pooled_obj_p);
@@ -301,12 +301,13 @@ void PoolSlot_release(struct PoolSlot* const self_p)
     else
     {
         // Object pool is not freed yet, do the actual release:
-        struct ObjectPool* const origin_p = self_p->shared_prop_p->origin_p;
-        origin_p->size++;
+        struct ObjectPool* const owner_pool_p =
+            self_p->shared_prop_p->owner_pool_p;
+        owner_pool_p->size++;
 
         self_p->is_in_pool = true;
-        self_p->next_p     = origin_p->head_p;
+        self_p->next_p     = owner_pool_p->head_p;
 
-        origin_p->head_p = self_p;
+        owner_pool_p->head_p = self_p;
     }
 }
