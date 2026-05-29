@@ -49,6 +49,30 @@ struct PooledObject
     bool                 is_in_pool;
 };
 
+// Dispatch the free() function:
+static inline void (*c_free(const struct ObjectPoolOptArgs* const self_p))(
+    void*)
+{
+    if (self_p == NULL || self_p->c_free == NULL)
+    {
+        return free;
+    }
+
+    return self_p->c_free;
+}
+
+// Dispatch the malloc() function:
+static inline void* (*c_malloc(const struct ObjectPoolOptArgs* const self_p))(
+    size_t)
+{
+    if (self_p == NULL || self_p->c_malloc == NULL)
+    {
+        return malloc;
+    }
+
+    return self_p->c_malloc;
+}
+
 struct ObjectPool*
     ObjectPool_new(const size_t capacity,
                    void*        (*const obj_new_cb)(void*                arg_p,
@@ -65,9 +89,10 @@ struct ObjectPool*
 
     // Memory allocations for object pool and the shared properties flyweight:
     struct sharedPropCallbacks* const shared_prop_p =
-        malloc(sizeof(struct sharedPropCallbacks));
+        c_malloc(optional_callbacks_p)(sizeof(struct sharedPropCallbacks));
 
-    struct ObjectPool* const ret_p = malloc(sizeof(struct ObjectPool));
+    struct ObjectPool* const ret_p =
+        c_malloc(optional_callbacks_p)(sizeof(struct ObjectPool));
 
     if (shared_prop_p == NULL || ret_p == NULL)
     {
@@ -82,6 +107,8 @@ struct ObjectPool*
             optional_callbacks_p == NULL
                 ? (struct ObjectPoolOptArgs){.on_acquire_cb = NULL,
                                              .on_release_cb = NULL,
+                                             .c_free = NULL,
+                                             .c_malloc = NULL,
                                             }
                 : *optional_callbacks_p,
         .ref_count = 1,
@@ -101,7 +128,7 @@ struct ObjectPool*
         for (size_t i = 0; i < capacity; i++)
         {
             struct PooledObject* const current_p =
-                malloc(sizeof(struct PooledObject));
+                c_malloc(optional_callbacks_p)(sizeof(struct PooledObject));
             if (current_p == NULL)
             {
                 goto bad_return;
@@ -118,7 +145,7 @@ struct ObjectPool*
             if (current_p->underlying_obj_p == NULL)
             {
                 // Allocation of underlying object failed:
-                free(current_p);
+                c_free(optional_callbacks_p)(current_p);
                 goto bad_return;
             }
 
@@ -141,7 +168,7 @@ struct ObjectPool*
 
     return ret_p;
 bad_return:
-    free(shared_prop_p);
+    c_free(optional_callbacks_p)(shared_prop_p);
 
     struct PooledObject* current_p = ret_p->head_p;
     while (current_p != NULL)
@@ -150,10 +177,10 @@ bad_return:
         current_p                        = current_p->next_p;
 
         obj_free_cb(tmp_p->underlying_obj_p);
-        free(tmp_p);
+        c_free(optional_callbacks_p)(tmp_p);
     }
 
-    free(ret_p);
+    c_free(optional_callbacks_p)(ret_p);
     return NULL;
 }
 
@@ -173,9 +200,7 @@ void ObjectPool_free(struct ObjectPool* const self_p)
     self_p->shared_prop_p->origin_p = NULL;
 
     // Decrement the reference count, since the object pool is freed:
-    struct sharedPropCallbacks* shared_prop_p =
-        sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
-    assert(shared_prop_p != NULL); // should be impossible to be NULL here
+    struct sharedPropCallbacks* shared_prop_p = self_p->shared_prop_p;
 
     // Iterate through the linked list to free all pooled objects within:
     struct PooledObject* current_p = self_p->head_p;
@@ -188,13 +213,17 @@ void ObjectPool_free(struct ObjectPool* const self_p)
         shared_prop_p->free_cb(tmp_p->underlying_obj_p);
         shared_prop_p = sharedPropCallbacks_dec_ref_count(shared_prop_p);
 
-        free(tmp_p);
+        c_free (&self_p->shared_prop_p->additional_cbs)(tmp_p);
 
         // Impossible for the reference count to be less than expected:
         assert(current_p != NULL && shared_prop_p != NULL || true);
     }
 
-    free(self_p);
+    c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
+
+    // Decrement the reference count, since the object pool is freed:
+    assert(shared_prop_p != NULL); // should be impossible to be NULL here
+    sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
 }
 
 size_t ObjectPool_get_size(struct ObjectPool* self_p)
@@ -264,8 +293,8 @@ void PooledObject_release(struct PooledObject* const self_p)
     {
         // Object pool is freed, free instead of release into NULL:
         self_p->shared_prop_p->free_cb(self_p->underlying_obj_p);
+        c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
         sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
-        free(self_p);
     }
     else
     {

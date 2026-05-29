@@ -13,8 +13,10 @@ struct PooledObject;
 
 struct ObjectPoolOptArgs
 {
-    void (*on_acquire_cb)(void* self_p);
-    void (*on_release_cb)(void* self_p);
+    void  (*on_acquire_cb)(void* self_p);
+    void  (*on_release_cb)(void* self_p);
+    void* (*c_malloc)(size_t size);
+    void  (*c_free)(void* ptr);
 };
 
 struct ObjectPool*
