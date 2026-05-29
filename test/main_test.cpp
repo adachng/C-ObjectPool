@@ -25,12 +25,12 @@ class LifecycleObj
     void Release(void)
     {
         ASSERT_NE(slot_p, nullptr);
-        return PooledObject_release(slot_p);
+        return PoolSlot_release(slot_p);
     }
 
     // New callback:
-    static void* New(void*                arg_p,
-                     struct PooledObject* slot_p)
+    static void* New(void*            arg_p,
+                     struct PoolSlot* slot_p)
     {
         // Return nullptr instead of exception if failed:
         const auto ret_p = new (std::nothrow) LifecycleObj;
@@ -68,7 +68,7 @@ class LifecycleObj
     std::vector<State> StateVec;
 
   private:
-    struct PooledObject* slot_p; // non-owning
+    struct PoolSlot* slot_p; // non-owning
 };
 
 TEST(MainTest,
@@ -165,8 +165,8 @@ TEST(MainTest,
 namespace // MainTest, NewFailed
 {
 
-void* new_cb(void* const          arg_p,
-             struct PooledObject* slot_p)
+void* new_cb(void* const      arg_p,
+             struct PoolSlot* slot_p)
 {
     (void)slot_p;
     size_t* const new_counter_p = reinterpret_cast<size_t*>(arg_p);

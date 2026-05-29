@@ -34,19 +34,19 @@ static struct poolStateFlyweight*
 struct ObjectPool
 {
     struct poolStateFlyweight* shared_prop_p;
-    struct PooledObject*       head_p;
+    struct PoolSlot*           head_p;
 
     size_t capacity;
     size_t size;
 };
 
-struct PooledObject
+struct PoolSlot
 {
     struct poolStateFlyweight* shared_prop_p;
     void*                      underlying_obj_p;
 
-    struct PooledObject* next_p;
-    bool                 is_in_pool;
+    struct PoolSlot* next_p;
+    bool             is_in_pool;
 };
 
 // Dispatch the free() function:
@@ -75,8 +75,8 @@ static inline void* (*c_malloc(const struct ObjectPoolOptArgs* const self_p))(
 
 struct ObjectPool*
     ObjectPool_new(const size_t capacity,
-                   void*        (*const obj_new_cb)(void*                arg_p,
-                                             struct PooledObject* slot_p),
+                   void*        (*const obj_new_cb)(void*            arg_p,
+                                             struct PoolSlot* slot_p),
 
                    void        (*const obj_free_cb)(void* self_p),
                    void* const arg_p,
@@ -124,17 +124,17 @@ struct ObjectPool*
 
     // Memory allocations for the pooled objects linked list:
     {
-        struct PooledObject* prev_p = NULL;
+        struct PoolSlot* prev_p = NULL;
         for (size_t i = 0; i < capacity; i++)
         {
-            struct PooledObject* const current_p =
-                c_malloc(optional_callbacks_p)(sizeof(struct PooledObject));
+            struct PoolSlot* const current_p =
+                c_malloc(optional_callbacks_p)(sizeof(struct PoolSlot));
             if (current_p == NULL)
             {
                 goto bad_return;
             }
 
-            *current_p = (struct PooledObject){
+            *current_p = (struct PoolSlot){
                 .shared_prop_p    = shared_prop_p,
                 .next_p           = NULL,
                 .underlying_obj_p = obj_new_cb(arg_p, current_p),
@@ -170,11 +170,11 @@ struct ObjectPool*
 bad_return:
     c_free(optional_callbacks_p)(shared_prop_p);
 
-    struct PooledObject* current_p = ret_p->head_p;
+    struct PoolSlot* current_p = ret_p->head_p;
     while (current_p != NULL)
     {
-        struct PooledObject* const tmp_p = current_p;
-        current_p                        = current_p->next_p;
+        struct PoolSlot* const tmp_p = current_p;
+        current_p                    = current_p->next_p;
 
         obj_free_cb(tmp_p->underlying_obj_p);
         c_free(optional_callbacks_p)(tmp_p);
@@ -203,10 +203,10 @@ void ObjectPool_free(struct ObjectPool* const self_p)
     struct poolStateFlyweight* shared_prop_p = self_p->shared_prop_p;
 
     // Iterate through the linked list to free all pooled objects within:
-    struct PooledObject* current_p = self_p->head_p;
+    struct PoolSlot* current_p = self_p->head_p;
     while (current_p != NULL)
     {
-        struct PooledObject* const tmp_p = current_p;
+        struct PoolSlot* const tmp_p = current_p;
         assert(tmp_p->is_in_pool == true);
         current_p = current_p->next_p;
 
@@ -249,8 +249,8 @@ void* ObjectPool_acquire(struct ObjectPool* self_p)
     assert(self_p->head_p != NULL);
 
     // Update linked list relationships:
-    struct PooledObject* const to_acquire_p = self_p->head_p;
-    self_p->head_p                          = to_acquire_p->next_p;
+    struct PoolSlot* const to_acquire_p = self_p->head_p;
+    self_p->head_p                      = to_acquire_p->next_p;
 
     to_acquire_p->next_p     = NULL;
     to_acquire_p->is_in_pool = false;
@@ -265,7 +265,7 @@ void* ObjectPool_acquire(struct ObjectPool* self_p)
     return to_acquire_p->underlying_obj_p;
 }
 
-void PooledObject_release(struct PooledObject* const self_p)
+void PoolSlot_release(struct PoolSlot* const self_p)
 {
     if (self_p == NULL)
     {

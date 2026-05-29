@@ -9,7 +9,7 @@ extern "C"
 #endif
 
 struct ObjectPool;
-struct PooledObject;
+struct PoolSlot;
 
 struct ObjectPoolOptArgs
 {
@@ -21,8 +21,8 @@ struct ObjectPoolOptArgs
 
 struct ObjectPool*
     ObjectPool_new(size_t capacity,
-                   void*  (*obj_new_cb)(void*                arg_p,
-                                       struct PooledObject* slot_p),
+                   void*  (*obj_new_cb)(void*            arg_p,
+                                       struct PoolSlot* slot_p),
 
                    void                            (*obj_free_cb)(void* self_p),
                    void*                           arg_p,
@@ -34,7 +34,7 @@ size_t ObjectPool_get_size(struct ObjectPool* self_p);
 
 void* ObjectPool_acquire(struct ObjectPool* self_p);
 
-void PooledObject_release(struct PooledObject* self_p);
+void PoolSlot_release(struct PoolSlot* self_p);
 
 #ifdef __cplusplus
 }
