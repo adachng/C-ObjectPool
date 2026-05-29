@@ -43,7 +43,7 @@ struct ObjectPool
 struct PoolSlot
 {
     struct poolStateFlyweight* shared_prop_p;
-    void*                      underlying_obj_p;
+    void*                      pooled_obj_p;
 
     struct PoolSlot* next_p;
     bool             is_in_pool;
@@ -135,14 +135,14 @@ struct ObjectPool*
             }
 
             *current_p = (struct PoolSlot){
-                .shared_prop_p    = shared_prop_p,
-                .next_p           = NULL,
-                .underlying_obj_p = obj_new_cb(arg_p, current_p),
-                .is_in_pool       = true,
+                .shared_prop_p = shared_prop_p,
+                .next_p        = NULL,
+                .pooled_obj_p  = obj_new_cb(arg_p, current_p),
+                .is_in_pool    = true,
             };
 
             shared_prop_p->ref_count++;
-            if (current_p->underlying_obj_p == NULL)
+            if (current_p->pooled_obj_p == NULL)
             {
                 // Allocation of underlying object failed:
                 c_free(optional_callbacks_p)(current_p);
@@ -176,7 +176,7 @@ bad_return:
         struct PoolSlot* const tmp_p = current_p;
         current_p                    = current_p->next_p;
 
-        obj_free_cb(tmp_p->underlying_obj_p);
+        obj_free_cb(tmp_p->pooled_obj_p);
         c_free(optional_callbacks_p)(tmp_p);
     }
 
@@ -210,7 +210,7 @@ void ObjectPool_free(struct ObjectPool* const self_p)
         assert(tmp_p->is_in_pool == true);
         current_p = current_p->next_p;
 
-        shared_prop_p->free_cb(tmp_p->underlying_obj_p);
+        shared_prop_p->free_cb(tmp_p->pooled_obj_p);
         shared_prop_p = poolStateFlyweight_dec_ref_count(shared_prop_p);
 
         c_free (&self_p->shared_prop_p->additional_cbs)(tmp_p);
@@ -259,10 +259,10 @@ void* ObjectPool_acquire(struct ObjectPool* self_p)
     if (self_p->shared_prop_p->additional_cbs.on_acquire_cb != NULL)
     {
         self_p->shared_prop_p->additional_cbs.on_acquire_cb(
-            to_acquire_p->underlying_obj_p);
+            to_acquire_p->pooled_obj_p);
     }
 
-    return to_acquire_p->underlying_obj_p;
+    return to_acquire_p->pooled_obj_p;
 }
 
 void PoolSlot_release(struct PoolSlot* const self_p)
@@ -287,13 +287,13 @@ void PoolSlot_release(struct PoolSlot* const self_p)
     if (self_p->shared_prop_p->additional_cbs.on_release_cb != NULL)
     {
         self_p->shared_prop_p->additional_cbs.on_release_cb(
-            self_p->underlying_obj_p);
+            self_p->pooled_obj_p);
     }
 
     if (self_p->shared_prop_p->origin_p == NULL)
     {
         // Object pool is freed, free instead of release into NULL:
-        self_p->shared_prop_p->free_cb(self_p->underlying_obj_p);
+        self_p->shared_prop_p->free_cb(self_p->pooled_obj_p);
         struct poolStateFlyweight* const tmp_p = self_p->shared_prop_p;
         c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
         poolStateFlyweight_dec_ref_count(tmp_p);
