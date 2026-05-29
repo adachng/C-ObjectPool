@@ -7,7 +7,7 @@
 
 struct poolStateFlyweight
 {
-    struct ObjectPoolOptArgs additional_cbs;
+    struct ObjectPoolOptArgs optional_callbacks;
     void                     (*free_cb)(void* self_p);
     struct ObjectPool* owner_pool_p; // set to NULL if object pool is freed
     size_t             ref_count;
@@ -103,7 +103,7 @@ struct ObjectPool*
     *shared_prop_p = (struct poolStateFlyweight){
         .free_cb  = obj_free_cb,
         .owner_pool_p = ret_p,
-        .additional_cbs =
+        .optional_callbacks =
             optional_callbacks_p == NULL
                 ? (struct ObjectPoolOptArgs){.on_acquire_cb = NULL,
                                              .on_release_cb = NULL,
@@ -213,14 +213,14 @@ void ObjectPool_free(struct ObjectPool* const self_p)
         shared_prop_p->free_cb(tmp_p->pooled_obj_p);
         shared_prop_p = poolStateFlyweight_dec_ref_count(shared_prop_p);
 
-        c_free (&self_p->shared_prop_p->additional_cbs)(tmp_p);
+        c_free (&self_p->shared_prop_p->optional_callbacks)(tmp_p);
 
         // Impossible for the reference count to be less than expected:
         assert(current_p != NULL && shared_prop_p != NULL || true);
     }
 
     struct poolStateFlyweight* const tmp_p = self_p->shared_prop_p;
-    c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
+    c_free (&self_p->shared_prop_p->optional_callbacks)(self_p);
 
     // Decrement the reference count, since the object pool is freed:
     assert(shared_prop_p != NULL); // should be impossible to be NULL here
@@ -256,9 +256,9 @@ void* ObjectPool_acquire(struct ObjectPool* self_p)
     to_acquire_p->is_in_pool = false;
 
     // Run activation callback if specified during object pool creation:
-    if (self_p->shared_prop_p->additional_cbs.on_acquire_cb != NULL)
+    if (self_p->shared_prop_p->optional_callbacks.on_acquire_cb != NULL)
     {
-        self_p->shared_prop_p->additional_cbs.on_acquire_cb(
+        self_p->shared_prop_p->optional_callbacks.on_acquire_cb(
             to_acquire_p->pooled_obj_p);
     }
 
@@ -284,9 +284,9 @@ void PoolSlot_release(struct PoolSlot* const self_p)
     assert(self_p->shared_prop_p->free_cb != NULL);
 
     // Run deactivation callback if specified during object pool creation:
-    if (self_p->shared_prop_p->additional_cbs.on_release_cb != NULL)
+    if (self_p->shared_prop_p->optional_callbacks.on_release_cb != NULL)
     {
-        self_p->shared_prop_p->additional_cbs.on_release_cb(
+        self_p->shared_prop_p->optional_callbacks.on_release_cb(
             self_p->pooled_obj_p);
     }
 
@@ -295,7 +295,7 @@ void PoolSlot_release(struct PoolSlot* const self_p)
         // Object pool is freed, free instead of release into NULL:
         self_p->shared_prop_p->free_cb(self_p->pooled_obj_p);
         struct poolStateFlyweight* const tmp_p = self_p->shared_prop_p;
-        c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
+        c_free (&self_p->shared_prop_p->optional_callbacks)(self_p);
         poolStateFlyweight_dec_ref_count(tmp_p);
     }
     else
