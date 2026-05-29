@@ -76,7 +76,7 @@ static inline void* (*c_malloc(const struct ObjectPoolOptArgs* const self_p))(
 struct ObjectPool*
     ObjectPool_new(const size_t capacity,
                    void*        (*const obj_new_cb)(void*                arg_p,
-                                             struct PooledObject* tag_p),
+                                             struct PooledObject* slot_p),
 
                    void        (*const obj_free_cb)(void* self_p),
                    void* const arg_p,

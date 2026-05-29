@@ -22,7 +22,7 @@ struct ObjectPoolOptArgs
 struct ObjectPool*
     ObjectPool_new(size_t capacity,
                    void*  (*obj_new_cb)(void*                arg_p,
-                                       struct PooledObject* tag_p),
+                                       struct PooledObject* slot_p),
 
                    void                            (*obj_free_cb)(void* self_p),
                    void*                           arg_p,

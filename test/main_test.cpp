@@ -24,13 +24,13 @@ class LifecycleObj
     // Release into the pool:
     void Release(void)
     {
-        ASSERT_NE(tag_p, nullptr);
-        return PooledObject_release(tag_p);
+        ASSERT_NE(slot_p, nullptr);
+        return PooledObject_release(slot_p);
     }
 
     // New callback:
     static void* New(void*                arg_p,
-                     struct PooledObject* tag_p)
+                     struct PooledObject* slot_p)
     {
         // Return nullptr instead of exception if failed:
         const auto ret_p = new (std::nothrow) LifecycleObj;
@@ -39,8 +39,8 @@ class LifecycleObj
         // NOTE: ASSERT_EQ() macro needs to be in functions that return void.
         EXPECT_EQ(ret_p->StateVec.size(), 1);
 
-        ret_p->tag_p = tag_p;
-        ret_p->Name  = *reinterpret_cast<std::string*>(arg_p);
+        ret_p->slot_p = slot_p;
+        ret_p->Name   = *reinterpret_cast<std::string*>(arg_p);
         return reinterpret_cast<void*>(ret_p);
     }
 
@@ -68,7 +68,7 @@ class LifecycleObj
     std::vector<State> StateVec;
 
   private:
-    struct PooledObject* tag_p; // non-owning
+    struct PooledObject* slot_p; // non-owning
 };
 
 TEST(MainTest,
@@ -166,9 +166,9 @@ namespace // MainTest, NewFailed
 {
 
 void* new_cb(void* const          arg_p,
-             struct PooledObject* tag_p)
+             struct PooledObject* slot_p)
 {
-    (void)tag_p;
+    (void)slot_p;
     size_t* const new_counter_p = reinterpret_cast<size_t*>(arg_p);
     (*new_counter_p)++;
     return NULL;
