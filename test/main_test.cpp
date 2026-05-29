@@ -2,6 +2,8 @@
 
 #include <ObjectPool.h>
 
+#include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -202,13 +204,147 @@ TEST(MainTest,
 
 } // namespace
 
-// TODO:
-// namespace // MainTest, Leakage
-// {
-//
-// TEST(MainTest,
-//      Leakage)
-// {
-// }
-//
-// } // namespace
+namespace // MainTest, Leakage
+{
+
+struct MyStruct
+{
+    struct PoolSlot* slot_p;
+};
+
+void* MyStruct_new(void* const            arg_p,
+                   struct PoolSlot* const slot_p)
+{
+    struct MyStruct* const ret_p =
+        reinterpret_cast<struct MyStruct*>(malloc(sizeof(struct MyStruct)));
+    if (ret_p == NULL)
+    {
+        return NULL;
+    }
+
+    *ret_p = (struct MyStruct){.slot_p = slot_p};
+    return reinterpret_cast<void*>(ret_p);
+}
+
+void MyStruct_free(void* const self_p)
+{
+    return free(self_p);
+}
+
+void MyStruct_release(struct MyStruct* const self_p)
+{
+    return PoolSlot_release(self_p->slot_p);
+}
+
+TEST(MainTest,
+     Memory)
+{
+    // NOTE: if using Valgrind, ensure --max-stackframe is sufficient.
+
+    const struct ObjectPoolOptArgs add_args = {
+        .c_malloc = malloc,
+        .c_free   = free,
+    };
+
+    // Allocate and deallocate 1 million objects:
+    {
+        constexpr auto pool_capacity = size_t{1000000ULL};
+
+        struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
+                                                         MyStruct_new,
+                                                         MyStruct_free,
+                                                         NULL,
+                                                         &add_args);
+        ASSERT_NE(pool_p, nullptr);
+
+        ObjectPool_free(pool_p);
+    }
+
+    // Allocate, acquire all, and deallocate the pool:
+    {
+        constexpr auto           pool_capacity = size_t{1000000ULL};
+        struct ObjectPool* const pool_p        = ObjectPool_new(pool_capacity,
+                                                         MyStruct_new,
+                                                         MyStruct_free,
+                                                         NULL,
+                                                         &add_args);
+        ASSERT_NE(pool_p, nullptr);
+
+        // Array to hold all objects acquired:
+        std::array<struct MyStruct*, pool_capacity> pointer_arr;
+        pointer_arr.fill(nullptr);
+        ASSERT_TRUE(std::all_of(pointer_arr.begin(),
+                                pointer_arr.end(),
+                                [](const struct MyStruct* const p)
+                                { return p == nullptr; }));
+
+        // Acquire all objects:
+        for (size_t i = 0; i < pointer_arr.size(); // NOTE: same as max_size()
+             i++)
+        {
+            pointer_arr[i] =
+                reinterpret_cast<struct MyStruct*>(ObjectPool_acquire(pool_p));
+        }
+        for (size_t i = 0; i < pointer_arr.size(); i++)
+        {
+            ASSERT_EQ(ObjectPool_acquire(pool_p), nullptr);
+        }
+        ASSERT_TRUE(std::all_of(pointer_arr.begin(),
+                                pointer_arr.end(),
+                                [](const struct MyStruct* const p)
+                                { return p != nullptr; }));
+
+        // Free the pool:
+        ObjectPool_free(pool_p);
+
+        // Release all objects:
+        for (size_t i = 0; i < pointer_arr.size(); i++)
+        {
+            // CAUTION: doing MyStruct_free(pointer_arr[i]) is incorrect usage!
+            MyStruct_release(pointer_arr[i]);
+        }
+    }
+
+    // Allocate, acquire half, and free the pool + release the acquired objects:
+    {
+        constexpr auto           pool_capacity = size_t{1000000ULL};
+        struct ObjectPool* const pool_p        = ObjectPool_new(pool_capacity,
+                                                         MyStruct_new,
+                                                         MyStruct_free,
+                                                         NULL,
+                                                         &add_args);
+        ASSERT_NE(pool_p, nullptr);
+
+        // Array to hold all objects acquired:
+        std::array<struct MyStruct*, pool_capacity / 2> pointer_arr;
+        pointer_arr.fill(nullptr);
+        ASSERT_TRUE(std::all_of(pointer_arr.begin(),
+                                pointer_arr.end(),
+                                [](const struct MyStruct* const p)
+                                { return p == nullptr; }));
+
+        // Acquire all objects:
+        for (size_t i = 0; i < pointer_arr.size(); // NOTE: same as max_size()
+             i++)
+        {
+            pointer_arr[i] =
+                reinterpret_cast<struct MyStruct*>(ObjectPool_acquire(pool_p));
+        }
+        ASSERT_TRUE(std::all_of(pointer_arr.begin(),
+                                pointer_arr.end(),
+                                [](const struct MyStruct* const p)
+                                { return p != nullptr; }));
+
+        // Free the pool:
+        ObjectPool_free(pool_p);
+
+        // Release all objects:
+        for (size_t i = 0; i < pointer_arr.size(); i++)
+        {
+            // CAUTION: doing MyStruct_free(pointer_arr[i]) is incorrect usage!
+            MyStruct_release(pointer_arr[i]);
+        }
+    }
+}
+
+} // namespace
