@@ -121,6 +121,7 @@ struct ObjectPool*
             if (current_p->underlying_obj_p == NULL)
             {
                 // Allocation of underlying object failed:
+                free(current_p);
                 goto bad_return;
             }
 
@@ -131,6 +132,7 @@ struct ObjectPool*
             }
             else
             {
+                assert(prev_p == NULL);
                 ret_p->head_p = current_p;
             }
 
@@ -265,6 +267,7 @@ void PooledObject_release(struct PooledObject* const self_p)
     {
         // Object pool is freed, free instead of release into NULL:
         self_p->shared_prop_p->free_cb(self_p->underlying_obj_p);
+        sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
         free(self_p);
     }
     else
