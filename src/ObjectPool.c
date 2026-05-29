@@ -79,14 +79,11 @@ struct ObjectPool*
         .free_cb  = obj_free_cb,
         .origin_p = ret_p,
         .additional_cbs =
-            {
-                .on_acquire_cb = optional_callbacks_p == NULL
-                                     ? NULL
-                                     : optional_callbacks_p->on_acquire_cb,
-                .on_release_cb = optional_callbacks_p == NULL
-                                     ? NULL
-                                     : optional_callbacks_p->on_release_cb,
-            },
+            optional_callbacks_p == NULL
+                ? (struct ObjectPoolOptArgs){.on_acquire_cb = NULL,
+                                             .on_release_cb = NULL,
+                                            }
+                : *optional_callbacks_p,
         .ref_count = 1,
     };
 
