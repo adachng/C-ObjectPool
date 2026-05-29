@@ -18,4 +18,7 @@ if(PROJECT_IS_TOP_LEVEL)
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${stage_dir}/$<CONFIG>/${CMAKE_INSTALL_LIBDIR})
     endif()
     unset(stage_dir)
+
+    # Generate compile_commands.json:
+    set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 endif()
