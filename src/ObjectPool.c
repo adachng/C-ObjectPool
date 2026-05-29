@@ -219,11 +219,12 @@ void ObjectPool_free(struct ObjectPool* const self_p)
         assert(current_p != NULL && shared_prop_p != NULL || true);
     }
 
+    struct sharedPropCallbacks* const tmp_p = self_p->shared_prop_p;
     c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
 
     // Decrement the reference count, since the object pool is freed:
     assert(shared_prop_p != NULL); // should be impossible to be NULL here
-    sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
+    sharedPropCallbacks_dec_ref_count(tmp_p);
 }
 
 size_t ObjectPool_get_size(struct ObjectPool* self_p)
@@ -293,8 +294,9 @@ void PooledObject_release(struct PooledObject* const self_p)
     {
         // Object pool is freed, free instead of release into NULL:
         self_p->shared_prop_p->free_cb(self_p->underlying_obj_p);
+        struct sharedPropCallbacks* const tmp_p = self_p->shared_prop_p;
         c_free (&self_p->shared_prop_p->additional_cbs)(self_p);
-        sharedPropCallbacks_dec_ref_count(self_p->shared_prop_p);
+        sharedPropCallbacks_dec_ref_count(tmp_p);
     }
     else
     {
