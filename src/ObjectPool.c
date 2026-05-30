@@ -249,7 +249,7 @@ void ObjectPool_free(struct ObjectPool* const self_p)
     poolStateFlyweight_dec_ref_count(tmp_p);
 }
 
-size_t ObjectPool_get_size(struct ObjectPool* self_p)
+size_t ObjectPool_get_size(const struct ObjectPool* const self_p)
 {
     if (self_p == NULL)
     {
@@ -257,6 +257,16 @@ size_t ObjectPool_get_size(struct ObjectPool* self_p)
     }
 
     return self_p->size;
+}
+
+size_t ObjectPool_get_capacity(const struct ObjectPool* const self_p)
+{
+    if (self_p == NULL)
+    {
+        return self_p->size;
+    }
+
+    return self_p->capacity;
 }
 
 void* ObjectPool_acquire(struct ObjectPool* self_p)
@@ -332,4 +342,14 @@ void PoolSlot_release(struct PoolSlot* const self_p)
 
         owner_pool_p->head_p = self_p;
     }
+}
+
+bool PoolSlot_is_in_pool(const struct PoolSlot* self_p)
+{
+    if (self_p == NULL)
+    {
+        return false;
+    }
+
+    return self_p->is_in_pool;
 }

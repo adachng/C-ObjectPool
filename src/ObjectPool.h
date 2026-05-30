@@ -23,6 +23,7 @@
 #ifndef C_OBJECTPOOL__OBJECTPOOL_H
 #define C_OBJECTPOOL__OBJECTPOOL_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -52,11 +53,15 @@ struct ObjectPool*
 
 void ObjectPool_free(struct ObjectPool* self_p);
 
-size_t ObjectPool_get_size(struct ObjectPool* self_p);
+size_t ObjectPool_get_size(const struct ObjectPool* self_p);
+
+size_t ObjectPool_get_capacity(const struct ObjectPool* self_p);
 
 void* ObjectPool_acquire(struct ObjectPool* self_p);
 
 void PoolSlot_release(struct PoolSlot* self_p);
+
+bool PoolSlot_is_in_pool(const struct PoolSlot* self_p);
 
 #ifdef __cplusplus
 }
