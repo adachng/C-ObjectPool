@@ -15,3 +15,7 @@ add_executable(snippet_1_basic_usage
 add_executable(snippet_2_optional_callbacks
     2_optional_callbacks.c
 )
+
+add_executable(snippet_3_failure_cases
+    3_failure_cases.c
+)
