@@ -11,3 +11,7 @@ add_executable(snippet_0_basic_usage
 add_executable(snippet_1_basic_usage
     1_basic_usage.c
 )
+
+add_executable(snippet_2_optional_callbacks
+    2_optional_callbacks.c
+)
