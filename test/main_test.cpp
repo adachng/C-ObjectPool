@@ -348,3 +348,125 @@ TEST(MainTest,
 }
 
 } // namespace
+
+namespace // MainTest, OptionalCallbacks
+{
+
+struct ArbitraryStruct
+{
+    struct PoolSlot* slot_p;
+};
+
+size_t malloc_call_counter = 0;
+size_t free_call_counter   = 0;
+
+void* malloc_call(const size_t size)
+{
+    malloc_call_counter++;
+    return malloc(size);
+};
+
+void free_call(void* const ptr)
+{
+    free_call_counter++;
+    return free(ptr);
+};
+
+void* ArbitraryStruct_new(void* const            unused_p,
+                          struct PoolSlot* const slot_p)
+{
+    const auto ret_p = reinterpret_cast<struct ArbitraryStruct*>(
+        malloc_call(sizeof(struct ArbitraryStruct)));
+    ret_p->slot_p = slot_p;
+    return ret_p;
+}
+
+void ArbitraryStruct_release(struct ArbitraryStruct* const self_p)
+{
+    return PoolSlot_release(self_p->slot_p);
+}
+
+void ArbitraryStruct_free(void* const self_p)
+{
+    return free_call(self_p);
+}
+
+size_t acquire_counter = 0;
+size_t release_counter = 0;
+
+TEST(MainTest,
+     OptionalCallbacks)
+{
+    auto acquire_cb = [](void* const unused_p)
+    {
+        acquire_counter++;
+    };
+    auto release_cb = [](void* const unused_p)
+    {
+        release_counter++;
+    };
+
+    ASSERT_EQ(acquire_counter, 0);
+    ASSERT_EQ(release_counter, 0);
+    ASSERT_EQ(malloc_call_counter, 0);
+    ASSERT_EQ(free_call_counter, 0);
+
+    const struct ObjectPoolOptArgs args = {.on_acquire_cb = acquire_cb,
+                                           .on_release_cb = release_cb,
+                                           .c_malloc      = malloc_call,
+                                           .c_free        = free_call};
+
+    constexpr size_t pool_capacity = 100ULL;
+
+    struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
+                                                     ArbitraryStruct_new,
+                                                     ArbitraryStruct_free,
+                                                     NULL,
+                                                     &args);
+
+    ASSERT_EQ(acquire_counter, 0);
+    ASSERT_EQ(release_counter, 0);
+
+    // Assert acquire and release counters:
+    {
+        struct ArbitraryStruct* const obj1_p =
+            reinterpret_cast<struct ArbitraryStruct*>(
+                ObjectPool_acquire(pool_p));
+
+        ASSERT_EQ(acquire_counter, 1);
+        ASSERT_EQ(release_counter, 0);
+
+        struct ArbitraryStruct* const obj2_p =
+            reinterpret_cast<struct ArbitraryStruct*>(
+                ObjectPool_acquire(pool_p));
+
+        ASSERT_EQ(acquire_counter, 2);
+        ASSERT_EQ(release_counter, 0);
+
+        ArbitraryStruct_release(obj1_p);
+
+        ASSERT_EQ(acquire_counter, 2);
+        ASSERT_EQ(release_counter, 1);
+
+        ArbitraryStruct_release(reinterpret_cast<struct ArbitraryStruct*>(
+            ObjectPool_acquire(pool_p)));
+
+        ASSERT_EQ(acquire_counter, 3);
+        ASSERT_EQ(release_counter, 2);
+
+        ArbitraryStruct_release(obj2_p);
+
+        ASSERT_EQ(acquire_counter, 3);
+        ASSERT_EQ(release_counter, 3);
+    }
+
+    ObjectPool_free(pool_p);
+
+    // Assert for malloc and free call counters:
+    ASSERT_EQ(malloc_call_counter,
+              size_t{1U + 1U} + size_t{pool_capacity * 2U});
+    // NOTE: 1U + 1U for the pool and flyweight.
+    ASSERT_EQ(malloc_call_counter, free_call_counter);
+}
+
+} // namespace
