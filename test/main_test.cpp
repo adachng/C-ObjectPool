@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ObjectPool.h>
+#include <c_objectpool/ObjectPool.h>
 
 #include <algorithm>
 #include <cstddef>

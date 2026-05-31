@@ -1,5 +1,5 @@
 add_library(c_objectpool
-    ObjectPool.c ObjectPool.h
+    c_objectpool/ObjectPool.c c_objectpool/ObjectPool.h
 )
 
 target_include_directories(c_objectpool
