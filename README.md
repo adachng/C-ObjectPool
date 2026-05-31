@@ -6,6 +6,15 @@ user-defined objects without any `malloc()` call past the pool's initialisation 
 This library requires user-provided function callbacks that manage the lifecycle of a user-defined object,
 and in turn shifts all `malloc()` calls to take place during the object pool's initialisation.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Advanced Usage](#advanced-usage)
+- [External Dependencies](#external-dependencies)
+    - [GoogleTest](#googletest-v1-17-0)
+        - [Usage](#usage-1)
+
 ## Installation
 
 The library is compatible with CMake. It is recommended to include this library as
@@ -65,6 +74,8 @@ obj1_p = NULL;
 With `C-ObjectPool`, the lifecycle becomes:
 
 ```c
+#include <c_objectpool/ObjectPool.h>
+
 // Allocation of the object pool:
 struct ObjectPool* pool_p = ObjectPool_new(100,             // pool capacity
                                            SomeStruct_new2, // modified allocation function
@@ -122,6 +133,8 @@ Here is a more concrete example of the `SomeStruct` definitions, including the
 "original" definitions not intended for object pooling:
 
 ```c
+#include <c_objectpool/ObjectPool.h>
+
 struct SomeStruct
 {
     // The library user needs to add this:
@@ -203,8 +216,15 @@ releasing the object.
 
 See [snippets](snippet) for more examples.
 
+See the [header file](src/c_objectpool/ObjectPool.h) for the complete API reference.
+
 ## External Dependencies
 
 ### [GoogleTest](https://github.com/google/googletest) ([v1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0))
 
-**Usage:** testing framework. Required only if this library is a top-level project (not used as a library).
+#### Usage
+
+Testing framework. Required only if this library is a top-level project (not used as a library).
+
+Note that running the unit test with Valgrind's [memcheck](https://valgrind.org/docs/manual/mc-manual.html) requires
+increasing the `--max-stackframe` value.
