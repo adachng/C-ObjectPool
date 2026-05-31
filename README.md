@@ -12,7 +12,7 @@ and in turn shifts all `malloc()` calls to take place during the object pool's i
 - [Usage](#usage)
     - [Advanced Usage](#advanced-usage)
 - [External Dependencies](#external-dependencies)
-    - [GoogleTest](#googletest-v1-17-0)
+    - [GoogleTest](#googletest-v1170)
         - [Usage](#usage-1)
 
 ## Installation
