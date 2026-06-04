@@ -104,7 +104,7 @@ struct ObjectPool*
                    void* const arg_p,
                    const struct ObjectPoolOptArgs* const optional_callbacks_p)
 {
-    if (capacity <= 1 || obj_new_cb == NULL || obj_obj_free_cb == NULL)
+    if (capacity <= 0 || obj_new_cb == NULL || obj_free_cb == NULL)
     {
         return NULL;
     }
