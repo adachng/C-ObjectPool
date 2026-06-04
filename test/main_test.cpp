@@ -469,4 +469,68 @@ TEST(MainTest,
     ASSERT_EQ(malloc_call_counter, free_call_counter);
 }
 
+namespace // MainTest, OneCapacity
+{
+
+TEST(MainTest,
+     OneCapacity)
+{
+    struct ComplexNumber
+    {
+        struct PoolSlot* slot_p;
+        int              i;
+        int              j;
+    };
+
+    auto ComplexNumber_new = [](void* const            arg_p,
+                                struct PoolSlot* const slot_p) -> void*
+    {
+        EXPECT_EQ(arg_p, nullptr);
+        EXPECT_NE(slot_p, nullptr);
+
+        const auto ret_p = reinterpret_cast<struct ComplexNumber*>(
+            malloc(sizeof(struct ComplexNumber)));
+
+        if (ret_p == NULL)
+        {
+            return NULL;
+        }
+
+        *ret_p = (struct ComplexNumber){
+            .slot_p = slot_p,
+        };
+
+        return ret_p;
+    };
+
+    auto ComplexNumber_free = [](void* const self_p) -> void
+    {
+        if (self_p == NULL)
+        {
+            return;
+        }
+
+        free(self_p);
+    };
+
+    const auto pool_p = ObjectPool_new(size_t{1},
+                                       ComplexNumber_new,
+                                       ComplexNumber_free,
+                                       NULL,
+                                       NULL);
+
+    ASSERT_NE(pool_p, nullptr);
+
+    const auto obj_p =
+        reinterpret_cast<ComplexNumber*>(ObjectPool_acquire(pool_p));
+
+    ASSERT_NE(obj_p, nullptr);
+    ASSERT_EQ(ObjectPool_acquire(pool_p), nullptr);
+
+    ObjectPool_free(pool_p);
+    PoolSlot_release(obj_p->slot_p);
+}
+
+} // namespace
+
 } // namespace
