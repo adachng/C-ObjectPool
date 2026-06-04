@@ -100,7 +100,7 @@ struct ObjectPool*
                    void*        (*const obj_new_cb)(void*            arg_p,
                                              struct PoolSlot* slot_p),
 
-                   void        (*const obj_obj_free_cb)(void* self_p),
+                   void        (*const obj_free_cb)(void* self_p),
                    void* const arg_p,
                    const struct ObjectPoolOptArgs* const optional_callbacks_p)
 {
@@ -123,7 +123,7 @@ struct ObjectPool*
 
     // Assign values to the shared properties flyweight:
     *shared_prop_p = (struct poolStateFlyweight){
-        .obj_free_cb  = obj_obj_free_cb,
+        .obj_free_cb  = obj_free_cb,
         .owner_pool_p = ret_p,
         .optional_callbacks =
             optional_callbacks_p == NULL
@@ -198,7 +198,7 @@ bad_return:
         struct PoolSlot* const tmp_p = current_p;
         current_p                    = current_p->next_p;
 
-        obj_obj_free_cb(tmp_p->pooled_obj_p);
+        obj_free_cb(tmp_p->pooled_obj_p);
         c_free(optional_callbacks_p)(tmp_p);
     }
 
