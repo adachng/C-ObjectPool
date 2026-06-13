@@ -1,0 +1,80 @@
+# clangsa: https://clang.llvm.org/docs/analyzer/checkers.html
+# clang-tidy: https://clang.llvm.org/extra/clang-tidy/checks/list.html
+
+# bugprone-easily-swappable-parameters gives too many false positives
+# bugprone-macro-parentheses gives too many false positives in assert() macro
+# cppcoreguidelines-avoid-c-arrays disallows C-style arrays in C++
+# cppcoreguidelines-avoid-do-while is not helpful for macros
+# cppcoreguidelines-avoid-magic-numbers gives a lot of false positives
+# cppcoreguidelines-avoid-non-const-global-variables flags singletons
+# cppcoreguidelines-no-malloc is not good with C/C++ interoperability
+# cppcoreguidelines-owning-memory needlessly enforces gsl::owner usage
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay disallows C-style arrays and standard functions
+# cppcoreguidelines-pro-type-cstyle-cast; C-style casts are necessary in C standard functions
+# cppcoreguidelines-pro-type-reinterpret-cast is not helpful; reinterpret_cast is used to explicitly violate type safety anyways
+# cppcoreguidelines-pro-type-vararg; alias for hicpp-vararg
+# hicpp-avoid-c-arrays; alias for cppcoreguidelines-avoid-c-arrays
+# hicpp-deprecated-headers; this checker decreases polyglot interoperability
+# hicpp-no-array-decay; alias for cppcoreguidelines-pro-bounds-array-to-pointer-decay
+# hicpp-no-malloc; alias for cppcoreguidelines-no-malloc
+# hicpp-signed-bitwise produces a lot of false positives for & operator
+# hicpp-use-auto is not as helpful; sometimes people want to see type explicitly
+# hicpp-use-nullptr is not helpful for complete C and C++ interoperability
+# hicpp-vararg; should be ignored because it's an extremely rare scenario and if it is present then it's intentional
+# modernize-avoid-c-arrays; alias for cppcoreguidelines-avoid-c-arrays
+# modernize-deprecated-headers; alias for hicpp-deprecated-headers
+# modernize-loop-convert; useless checker
+# modernize-use-auto; alias for hicpp-use-auto
+# modernize-use-nullptr; alias for hicpp-use-nullptr
+# modernize-use-trailing-return-type is pure nonsense, never use it
+# readability-avoid-return-with-void-value is objectively horrible for compatibility, best practice is to return void function for adapters
+# readability-function-cognitive-complexity gives out a lot of false positives for macro functions
+# readability-identifier-length is not helpful (e.g. variable named fd is reasonable)
+# readability-implicit-bool-conversion is not good for & operator (flag conditions)
+# readability-magic-numbers; alias for cppcoreguidelines-avoid-magic-numbers
+# readability-redundant-casting; promotes implicitness
+
+Checks: "\
+  -*,\
+  bugprone-*,\
+  -bugprone-easily-swappable-parameters,\
+  -bugprone-macro-parentheses,\
+  cert-*,\
+  clang-analyzer-*,\
+  cppcoreguidelines-*,\
+  -cppcoreguidelines-avoid-c-arrays,\
+  -cppcoreguidelines-avoid-do-while,\
+  -cppcoreguidelines-avoid-magic-numbers,\
+  -cppcoreguidelines-avoid-non-const-global-variables,\
+  -cppcoreguidelines-no-malloc,\
+  -cppcoreguidelines-owning-memory,\
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+  -cppcoreguidelines-pro-type-cstyle-cast,\
+  -cppcoreguidelines-pro-type-reinterpret-cast,\
+  -cppcoreguidelines-pro-type-vararg,\
+  hicpp-*,\
+  -hicpp-avoid-c-arrays,\
+  -hicpp-deprecated-headers,\
+  -hicpp-no-array-decay,\
+  -hicpp-no-malloc,\
+  -hicpp-signed-bitwise,\
+  -hicpp-use-auto,\
+  -hicpp-use-nullptr,\
+  -hicpp-vararg, \
+  misc-*,\
+  modernize-*,\
+  -modernize-avoid-c-arrays,\
+  -modernize-deprecated-headers,\
+  -modernize-loop-convert,\
+  -modernize-use-auto,\
+  -modernize-use-nullptr,\
+  -modernize-use-trailing-return-type,\
+  performance-*,\
+  portability-*,\
+  readability-*,\
+  -readability-avoid-return-with-void-value,\
+  -readability-function-cognitive-complexity,\
+  -readability-identifier-length,\
+  -readability-implicit-bool-conversion,\
+  -readability-magic-numbers,\
+  -readability-redundant-casting"
