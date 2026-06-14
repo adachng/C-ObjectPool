@@ -5,6 +5,14 @@
 include_guard(GLOBAL)
 
 set(
+    CODECHECKER_BIN
+    "CodeChecker"
+    CACHE
+    STRING
+    "CodeChecker command."
+)
+
+set(
     CODECHECKER_URL
     "127.0.0.1:8001/${CMAKE_PROJECT_NAME}"
     CACHE
@@ -41,7 +49,7 @@ add_custom_target(codechecker
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     VERBATIM
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CODECHECKER_REPORTS_DIR}
-    COMMAND CodeChecker analyze
+    COMMAND ${CODECHECKER_BIN} analyze
         ${CMAKE_BINARY_DIR}/compile_commands.json
         -o ${CODECHECKER_REPORTS_DIR}
         -i ${PROJECT_SOURCE_DIR}/.skipfile
@@ -49,7 +57,7 @@ add_custom_target(codechecker
         --analyzers clangsa clang-tidy gcc
         --analyzer-config clang-tidy:take-config-from-directory=true
         -n ${codechecker_run_name}
-    COMMAND CodeChecker store
+    COMMAND ${CODECHECKER_BIN} store
             ${CODECHECKER_REPORTS_DIR}
             --trim-path-prefix ${PROJECT_SOURCE_DIR}
             --url ${CODECHECKER_URL}
