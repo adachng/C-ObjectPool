@@ -9,6 +9,10 @@ list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include(ProjectEssentials)
 
+if(PROJECT_IS_TOP_LEVEL)
+    include(CodeChecker)
+endif()
+
 option(BUILD_SHARED_LIBS "Build using shared libraries." OFF)
 
 add_subdirectory(src)
