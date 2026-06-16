@@ -110,19 +110,16 @@ struct ObjectPool*
     }
 
     // Memory allocations for object pool and the shared properties flyweight:
-    struct poolStateFlyweight* const shared_prop_p =
-        c_malloc(optional_callbacks_p)(sizeof(struct poolStateFlyweight));
-
     struct ObjectPool* const ret_p =
         c_malloc(optional_callbacks_p)(sizeof(struct ObjectPool));
 
-    if (shared_prop_p == NULL || ret_p == NULL)
-    {
-        goto bad_return;
-    }
+    struct poolStateFlyweight* const shared_prop_p =
+        c_malloc(optional_callbacks_p)(sizeof(struct poolStateFlyweight));
 
-    // Assign values to the shared properties flyweight:
-    *shared_prop_p = (struct poolStateFlyweight){
+    if (shared_prop_p != NULL)
+    {
+        // Assign values to the shared properties flyweight:
+        *shared_prop_p = (struct poolStateFlyweight){
         .obj_free_cb  = obj_free_cb,
         .owner_pool_p = ret_p,
         .optional_callbacks =
@@ -135,14 +132,23 @@ struct ObjectPool*
                 : *optional_callbacks_p,
         .ref_count = 1,
     };
+    }
 
-    // Assign values to object pool:
-    *ret_p = (struct ObjectPool){
-        .shared_prop_p = shared_prop_p,
-        .head_p        = NULL,
-        .capacity      = capacity,
-        .size          = capacity,
-    };
+    if (ret_p != NULL)
+    {
+        // Assign values to object pool:
+        *ret_p = (struct ObjectPool){
+            .shared_prop_p = shared_prop_p,
+            .head_p        = NULL,
+            .capacity      = capacity,
+            .size          = capacity,
+        };
+    }
+
+    if (shared_prop_p == NULL || ret_p == NULL)
+    {
+        goto bad_return;
+    }
 
     // Memory allocations for the pooled objects linked list:
     {
