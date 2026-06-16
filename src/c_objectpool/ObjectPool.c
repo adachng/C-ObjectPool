@@ -192,14 +192,17 @@ struct ObjectPool*
 bad_return:
     c_free(optional_callbacks_p)(shared_prop_p);
 
-    struct PoolSlot* current_p = ret_p->head_p;
-    while (current_p != NULL)
+    if (ret_p != NULL)
     {
-        struct PoolSlot* const tmp_p = current_p;
-        current_p                    = current_p->next_p;
+        struct PoolSlot* current_p = ret_p->head_p;
+        while (current_p != NULL)
+        {
+            struct PoolSlot* const tmp_p = current_p;
+            current_p                    = current_p->next_p;
 
-        obj_free_cb(tmp_p->pooled_obj_p);
-        c_free(optional_callbacks_p)(tmp_p);
+            obj_free_cb(tmp_p->pooled_obj_p);
+            c_free(optional_callbacks_p)(tmp_p);
+        }
     }
 
     c_free(optional_callbacks_p)(ret_p);
@@ -236,6 +239,7 @@ void ObjectPool_free(struct ObjectPool* const self_p)
         assert(tmp_p->is_in_pool == true);
         current_p = current_p->next_p;
 
+        assert(shared_prop_p != NULL); // is never NULL
         shared_prop_p->obj_free_cb(tmp_p->pooled_obj_p);
         shared_prop_p = poolStateFlyweight_dec_ref_count(shared_prop_p);
 
@@ -265,7 +269,7 @@ size_t ObjectPool_get_capacity(const struct ObjectPool* const self_p)
 {
     if (self_p == NULL)
     {
-        return self_p->size;
+        return 0;
     }
 
     return self_p->capacity;
