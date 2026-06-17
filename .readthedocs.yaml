@@ -15,8 +15,6 @@ build:
   jobs:
     build:
       html:
-        - cd doc
-        - pwd
-        - cat /etc/os-release
         - cd doc && doxygen
-        - cp -r html $READTHEDOCS_OUTPUT/html/
+        - mkdir -p $READTHEDOCS_OUTPUT/html
+        - cp -rf doc/html $READTHEDOCS_OUTPUT
