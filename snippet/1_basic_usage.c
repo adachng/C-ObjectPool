@@ -36,7 +36,7 @@ static void* SomeStruct_new(void*            arg_p,
     return ret_p;
 }
 
-static void SomeStruct_free(void* self_p)
+static void SomeStruct_destroy(void* self_p)
 {
     return free(self_p);
 }
@@ -56,7 +56,7 @@ int main()
     struct ObjectPool* const pool_p =
         ObjectPool_new(pool_capacity,
                        SomeStruct_new,
-                       SomeStruct_free,
+                       SomeStruct_destroy,
                        &arg, // argument passed into callback
                        NULL);
 
@@ -79,7 +79,8 @@ int main()
 
         // Done with the pooled object, release back into the pool:
         SomeStruct_release(obj1_p);
-        // CAUTION: do not use SomeStruct_free(), as it will leak the PoolSlot!
+        // CAUTION: do not use SomeStruct_destroy(), as it will leak the
+        // PoolSlot!
 
         // The next time an object is acquired, it returns the same object:
         struct SomeStruct* const obj2_p = ObjectPool_acquire(pool_p);
@@ -92,7 +93,7 @@ int main()
     assert(obj1_p != NULL);
 
     // Pool is freed, but the pooled object is still usable:
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 
     // Still fine to do something with the user-defined object that is pooled:
     obj1_p->i = 3;

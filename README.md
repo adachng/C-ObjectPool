@@ -55,8 +55,8 @@ struct SomeStruct
     // some useful data that the library user needs
 };
 
-struct SomeStruct* SomeStruct_new(void);         // returns some form of malloc()'s return
-void SomeStruct_free(struct SomeStruct* self_p); // does some form of free()
+struct SomeStruct* SomeStruct_new(void);            // returns some form of malloc()'s return
+void SomeStruct_destroy(struct SomeStruct* self_p); // does some form of free()
 ```
 
 ```c
@@ -67,7 +67,7 @@ struct SomeStruct* obj1_p = SomeStruct_new(); // likely malloc() underneath
 // do some stuff with obj1_p...
 
 // Deallocation:
-SomeStruct_free(obj1_p); // likely free() underneath
+SomeStruct_destroy(obj1_p); // likely free() underneath
 obj1_p = NULL;
 ```
 
@@ -77,11 +77,11 @@ With `C-ObjectPool`, the lifecycle becomes:
 #include <c_objectpool/ObjectPool.h>
 
 // Allocation of the object pool:
-struct ObjectPool* pool_p = ObjectPool_new(100,             // pool capacity
-                                           SomeStruct_new2, // modified allocation function
-                                           SomeStruct_free, // identical deallocation function
-                                           NULL,            // argument passed into SomeStruct_new2()
-                                           NULL);           // optional arguments for advanced usage
+struct ObjectPool* pool_p = ObjectPool_new(100,                // pool capacity
+                                           SomeStruct_new2,    // modified allocation function
+                                           SomeStruct_destroy, // identical deallocation function
+                                           NULL,               // argument passed into SomeStruct_new2()
+                                           NULL);              // optional arguments for advanced usage
 
 // This may fail upon system OOM or user-defined SomeStruct_new2() fails (decided by user):
 assert(pool_p != NULL);
@@ -120,7 +120,7 @@ struct SomeStruct* obj1_p = ObjectPool_acquire(pool_p);
 // do some stuff with obj1_p...
 
 // Deallocation phase:
-ObjectPool_free(pool_p);
+ObjectPool_destroy(pool_p);
 SomeStruct_release(obj1_p); // the library allows release after freeing the pool
 
 // No memory leak at this point.
@@ -156,7 +156,7 @@ struct SomeStruct* SomeStruct_new(void)
 }
 
 // Already defined without object pooling:
-void SomeStruct_free(struct SomeStruct* self_p)
+void SomeStruct_destroy(struct SomeStruct* self_p)
 {
     return free(self_p);
 }

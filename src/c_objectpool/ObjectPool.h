@@ -47,11 +47,11 @@ struct ObjectPool*
                    void*  (*obj_new_cb)(void*            arg_p,
                                        struct PoolSlot* slot_p),
 
-                   void                            (*obj_free_cb)(void* self_p),
-                   void*                           arg_p,
+                   void  (*obj_destroy_cb)(void* self_p),
+                   void* arg_p,
                    const struct ObjectPoolOptArgs* optional_callbacks_p);
 
-void ObjectPool_free(struct ObjectPool* self_p);
+void ObjectPool_destroy(struct ObjectPool* self_p);
 
 size_t ObjectPool_get_size(const struct ObjectPool* self_p);
 

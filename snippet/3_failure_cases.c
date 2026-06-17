@@ -45,7 +45,7 @@ static void* SomeStruct_new(void*            arg_p,
     return ret_p;
 }
 
-static void SomeStruct_free(void* self_p)
+static void SomeStruct_destroy(void* self_p)
 {
     return free(self_p);
 }
@@ -74,15 +74,15 @@ int main()
 
         struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
                                                          SomeStruct_new,
-                                                         SomeStruct_free,
+                                                         SomeStruct_destroy,
                                                          &is_fail,
                                                          &args);
 
         assert(pool_p == NULL);
 
         // Nothing to free here, but still safe to call without checking:
-        ObjectPool_free(pool_p);
-        ObjectPool_free(NULL); // equivalent
+        ObjectPool_destroy(pool_p);
+        ObjectPool_destroy(NULL); // equivalent
     }
 
     // Scenario 2: user validation failure:
@@ -91,15 +91,15 @@ int main()
 
         struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
                                                          SomeStruct_new,
-                                                         SomeStruct_free,
+                                                         SomeStruct_destroy,
                                                          &is_fail,
                                                          NULL);
 
         assert(pool_p == NULL);
 
         // Nothing to free here, but still safe to call without checking:
-        ObjectPool_free(pool_p);
-        ObjectPool_free(NULL); // equivalent
+        ObjectPool_destroy(pool_p);
+        ObjectPool_destroy(NULL); // equivalent
     }
 
     assert(malloc_call_counter == MAX_MALLOC_CALL_COUNTER);

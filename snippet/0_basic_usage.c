@@ -28,7 +28,7 @@ static void* SomeStruct_new(void*            arg_p,
 }
 
 // User-defined callback for the library:
-static void SomeStruct_free(void* self_p)
+static void SomeStruct_destroy(void* self_p)
 {
     // NOTE: when using this library, provide this but do not call this.
     return free(self_p);
@@ -45,11 +45,11 @@ int main()
     const size_t             pool_capacity = 100U;
     struct ObjectPool* const pool_p        = ObjectPool_new(pool_capacity,
                                                      SomeStruct_new,
-                                                     SomeStruct_free,
+                                                     SomeStruct_destroy,
                                                      NULL,
                                                      NULL);
 
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 
     return 0;
 }

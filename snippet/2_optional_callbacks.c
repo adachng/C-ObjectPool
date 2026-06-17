@@ -17,7 +17,7 @@ static void* my_malloc(const size_t size)
     return ret_p;
 }
 
-static void my_free(void* const ptr)
+static void my_destroy(void* const ptr)
 {
     free_call_counter++;
     printf("freeing %p\n", ptr);
@@ -53,9 +53,9 @@ static void* SomeStruct_new(void*            arg_p,
     return ret_p;
 }
 
-static void SomeStruct_free(void* self_p)
+static void SomeStruct_destroy(void* self_p)
 {
-    return my_free(self_p);
+    return my_destroy(self_p);
 }
 
 static void SomeStruct_release(struct SomeStruct* self_p)
@@ -75,12 +75,12 @@ int main()
             .on_acquire_cb = SomeStruct_acquire_cb,
             .on_release_cb = SomeStruct_release_cb,
             .c_malloc      = my_malloc,
-            .c_free        = my_free,
+            .c_free        = my_destroy,
         };
 
         pool_p = ObjectPool_new(pool_capacity,
                                 SomeStruct_new,
-                                SomeStruct_free,
+                                SomeStruct_destroy,
                                 NULL,
                                 &args);
         // It is fine for args to expire here. There will be no illegal reads.
@@ -92,10 +92,10 @@ int main()
     struct SomeStruct* const obj1_p = ObjectPool_acquire(pool_p);
     assert(obj1_p != NULL);
 
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 
     printf("There are still 3 more free() call left:\n");
-    printf("\tSomeStruct_free() called by the library\n");
+    printf("\tSomeStruct_destroy() called by the library\n");
     printf("\tThe freeing of the flyweight called by the library\n");
     printf("\tThe freeing of the PoolSlot called by the library\n");
 

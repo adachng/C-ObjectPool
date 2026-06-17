@@ -156,7 +156,7 @@ TEST(MainTest,
               }));
 
     // Free the pool (obj2 is invalid after the free, but obj1 is still valid):
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 
     // Free obj1:
     obj1_p->Release(); // the library frees this object since the pool is freed
@@ -199,7 +199,7 @@ TEST(MainTest,
     ASSERT_EQ(new_counter, 1);
     ASSERT_EQ(free_counter, 0);
 
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 }
 
 } // namespace
@@ -226,7 +226,7 @@ void* MyStruct_new(void* const            arg_p,
     return reinterpret_cast<void*>(ret_p);
 }
 
-void MyStruct_free(void* const self_p)
+void MyStruct_destroy(void* const self_p)
 {
     return free(self_p);
 }
@@ -252,12 +252,12 @@ TEST(MainTest,
 
         struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
                                                          MyStruct_new,
-                                                         MyStruct_free,
+                                                         MyStruct_destroy,
                                                          NULL,
                                                          &add_args);
         ASSERT_NE(pool_p, nullptr);
 
-        ObjectPool_free(pool_p);
+        ObjectPool_destroy(pool_p);
     }
 
     // Allocate, acquire all, and deallocate the pool:
@@ -265,7 +265,7 @@ TEST(MainTest,
         constexpr auto           pool_capacity = size_t{1000000ULL};
         struct ObjectPool* const pool_p        = ObjectPool_new(pool_capacity,
                                                          MyStruct_new,
-                                                         MyStruct_free,
+                                                         MyStruct_destroy,
                                                          NULL,
                                                          &add_args);
         ASSERT_NE(pool_p, nullptr);
@@ -295,12 +295,13 @@ TEST(MainTest,
                                 { return p != nullptr; }));
 
         // Free the pool:
-        ObjectPool_free(pool_p);
+        ObjectPool_destroy(pool_p);
 
         // Release all objects:
         for (size_t i = 0; i < pointer_arr.size(); i++)
         {
-            // CAUTION: doing MyStruct_free(pointer_arr[i]) is incorrect usage!
+            // CAUTION: doing MyStruct_destroy(pointer_arr[i]) is incorrect
+            // usage!
             MyStruct_release(pointer_arr[i]);
         }
     }
@@ -310,7 +311,7 @@ TEST(MainTest,
         constexpr auto           pool_capacity = size_t{1000000ULL};
         struct ObjectPool* const pool_p        = ObjectPool_new(pool_capacity,
                                                          MyStruct_new,
-                                                         MyStruct_free,
+                                                         MyStruct_destroy,
                                                          NULL,
                                                          &add_args);
         ASSERT_NE(pool_p, nullptr);
@@ -336,12 +337,13 @@ TEST(MainTest,
                                 { return p != nullptr; }));
 
         // Free the pool:
-        ObjectPool_free(pool_p);
+        ObjectPool_destroy(pool_p);
 
         // Release all objects:
         for (size_t i = 0; i < pointer_arr.size(); i++)
         {
-            // CAUTION: doing MyStruct_free(pointer_arr[i]) is incorrect usage!
+            // CAUTION: doing MyStruct_destroy(pointer_arr[i]) is incorrect
+            // usage!
             MyStruct_release(pointer_arr[i]);
         }
     }
@@ -386,7 +388,7 @@ void ArbitraryStruct_release(struct ArbitraryStruct* const self_p)
     return PoolSlot_release(self_p->slot_p);
 }
 
-void ArbitraryStruct_free(void* const self_p)
+void ArbitraryStruct_destroy(void* const self_p)
 {
     return free_call(self_p);
 }
@@ -420,7 +422,7 @@ TEST(MainTest,
 
     struct ObjectPool* const pool_p = ObjectPool_new(pool_capacity,
                                                      ArbitraryStruct_new,
-                                                     ArbitraryStruct_free,
+                                                     ArbitraryStruct_destroy,
                                                      NULL,
                                                      &args);
 
@@ -460,7 +462,7 @@ TEST(MainTest,
         ASSERT_EQ(release_counter, 3);
     }
 
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
 
     // Assert for malloc and free call counters:
     ASSERT_EQ(malloc_call_counter,
@@ -503,7 +505,7 @@ TEST(MainTest,
         return ret_p;
     };
 
-    auto ComplexNumber_free = [](void* const self_p) -> void
+    auto ComplexNumber_destroy = [](void* const self_p) -> void
     {
         if (self_p == NULL)
         {
@@ -515,7 +517,7 @@ TEST(MainTest,
 
     const auto pool_p = ObjectPool_new(size_t{1},
                                        ComplexNumber_new,
-                                       ComplexNumber_free,
+                                       ComplexNumber_destroy,
                                        NULL,
                                        NULL);
 
@@ -527,7 +529,7 @@ TEST(MainTest,
     ASSERT_NE(obj_p, nullptr);
     ASSERT_EQ(ObjectPool_acquire(pool_p), nullptr);
 
-    ObjectPool_free(pool_p);
+    ObjectPool_destroy(pool_p);
     PoolSlot_release(obj_p->slot_p);
 }
 
