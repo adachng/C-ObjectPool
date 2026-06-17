@@ -6,7 +6,7 @@ version: 2
 
 # https://docs.readthedocs.com/platform/stable/config-file/v2.html#build
 build:
-  os: ubuntu-lts-latest
+  os: ubuntu-26.04
   tools:
     python: "3.13"
   apt_packages:
@@ -16,5 +16,7 @@ build:
     build:
       html:
         - cd doc
-        - doxygen
+        - pwd
+        - cat /etc/os-release
+        - cd doc && doxygen
         - cp -r html $READTHEDOCS_OUTPUT/html/
