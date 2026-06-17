@@ -232,3 +232,9 @@ Testing framework. Required only if this library is a top-level project (not use
 
 Note that running the unit test with Valgrind's [memcheck](https://valgrind.org/docs/manual/mc-manual.html) requires
 increasing the `--max-stackframe` value.
+
+### [Breathe](https://github.com/breathe-doc/breathe) ([Breathe v5.0.0a2](https://github.com/breathe-doc/breathe/releases/tag/v5.0.0a2))
+
+#### Usage
+
+Sphinx plugin to integrate Doxygen output.
