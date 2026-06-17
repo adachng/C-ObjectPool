@@ -218,6 +218,34 @@ See [snippets](snippet) for more examples.
 
 See the [header file](src/c_objectpool/ObjectPool.h) for the complete API reference.
 
+## API Reference
+
+### Interfaces
+
+The following are functions provided by the library:
+
+```c
+// Allocates and initialises an ObjectPool containing 
+ObjectPool_new(size_t capacity,
+                void*  (*obj_new_cb)(void*            arg_p,
+                                    struct PoolSlot* slot_p),
+
+                void                            (*obj_free_cb)(void* self_p),
+                void*                           arg_p,
+                const struct ObjectPoolOptArgs* optional_callbacks_p);
+
+```
+
+### Callbacks
+
+The following are function signatures (with placeholder function names) of the callbacks to provide to the library:
+
+```c
+// Mandatory: allocate the user-defined object.
+void* MyObj_new(void* arg_p,              // specified by user in ObjectPool_new()
+                struct PoolSlot* pool_p); // 
+```
+
 ## External Dependencies
 
 ### [GoogleTest](https://github.com/google/googletest) ([v1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0))
