@@ -16,7 +16,7 @@ author = "adachng"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-sys.path.append(os.path.abspath("breathe"))
+sys.path.append(os.path.abspath("breathe/breathe"))
 extensions = ["breathe"]
 breathe_projects = {project: "xml"}
 breathe_default_project = project
