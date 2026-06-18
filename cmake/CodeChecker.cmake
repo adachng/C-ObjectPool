@@ -4,24 +4,34 @@
 
 include_guard(GLOBAL)
 
-set(
-    CODECHECKER_BIN
+if(NOT PROJECT_IS_TOP_LEVEL)
+    return()
+endif()
+
+set(CODECHECKER_BIN
     "CodeChecker"
     CACHE
     STRING
     "CodeChecker command."
 )
 
-set(
-    CODECHECKER_URL
+find_program(CODECHECKER_EXE
+    NAMES ${CODECHECKER_BIN}
+    DOC "CodeChecker executable."
+)
+
+if(NOT CODECHECKER_EXE)
+    return()
+endif()
+
+set(CODECHECKER_URL
     "127.0.0.1:8001/${CMAKE_PROJECT_NAME}"
     CACHE
     STRING
     "CodeChecker URL for store command."
 )
 
-set(
-    CODECHECKER_REPORTS_DIR
+set(CODECHECKER_REPORTS_DIR
     "${PROJECT_BINARY_DIR}/.codechecker_reports"
     CACHE
     STRING

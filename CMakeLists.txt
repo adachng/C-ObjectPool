@@ -8,10 +8,7 @@ project(
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include(ProjectEssentials)
-
-if(PROJECT_IS_TOP_LEVEL)
-    include(CodeChecker)
-endif()
+include(CodeChecker)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries." OFF)
 
