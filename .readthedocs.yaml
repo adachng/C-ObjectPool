@@ -10,11 +10,13 @@ build:
   tools:
     python: "3.13"
   apt_packages:
+    - cmake
     - doxygen
     - graphviz
   jobs:
     build:
       html:
-        - cd doc && doxygen
+        - cmake -S . -B build
+        - cmake --build build --target doxygen
         - mkdir -p $READTHEDOCS_OUTPUT/html
-        - cp -rf doc/html $READTHEDOCS_OUTPUT
+        - cp -rf build/doc/html $READTHEDOCS_OUTPUT

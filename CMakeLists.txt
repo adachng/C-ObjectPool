@@ -15,6 +15,7 @@ option(BUILD_SHARED_LIBS "Build using shared libraries." OFF)
 add_subdirectory(src)
 
 if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(doc)
     add_subdirectory(test)
     add_subdirectory(snippet)
 endif()
