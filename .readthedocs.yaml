@@ -17,7 +17,7 @@ build:
     build:
       html:
         - mkdir -p $READTHEDOCS_OUTPUT
-        - cmake -S . -B build -DDOXYGEN_OUTPUT_DIRECTORY=$READTHEDOCS_OUTPUT
+        - cmake -S . -B build -DDOXYGEN_OUTPUT_DIRECTORY=$READTHEDOCS_OUTPUT -DDOC_FOR_USER=YES
         - cmake --build build --target doxygen
         - ls -lrta $READTHEDOCS_OUTPUT
 
