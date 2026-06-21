@@ -20,3 +20,6 @@ build:
         - cmake --build build --target doxygen
         - mkdir -p $READTHEDOCS_OUTPUT/build/doc/html
         - cp -rf build/doc/html $READTHEDOCS_OUTPUT
+
+submodules:
+  include: all
