@@ -16,11 +16,10 @@ build:
   jobs:
     build:
       html:
-        - cmake -S . -B build
+        - mkdir -p $READTHEDOCS_OUTPUT
+        - cmake -S . -B build -DDOXYGEN_OUTPUT_DIRECTORY=$READTHEDOCS_OUTPUT
         - cmake --build build --target doxygen
-        - rm -rf $READTHEDOCS_OUTPUT/build/doc/html
-        - mkdir -p $READTHEDOCS_OUTPUT/build/doc/html
-        - cp -rf build/doc/html $READTHEDOCS_OUTPUT
+        - ls -lrta $READTHEDOCS_OUTPUT
 
 submodules:
   include: all
