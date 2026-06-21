@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-// User-defined struct:
+//! [User-defined struct]
 struct SomeStruct
 {
     struct PoolSlot* slot_p; // MANDATORY
@@ -10,8 +10,9 @@ struct SomeStruct
     // some other data...
     // or another struct that the user cannot modify...
 };
+//! [User-defined struct]
 
-// User-defined callback for the library:
+//! [User-defined callback for the library to instantiate the object]
 static void* SomeStruct_new(void*            arg_p,
                             struct PoolSlot* slot_p)
 {
@@ -26,20 +27,24 @@ static void* SomeStruct_new(void*            arg_p,
 
     return ret_p;
 }
+//! [User-defined callback for the library to instantiate the object]
 
-// User-defined callback for the library:
+//! [User-defined callback for the library to destroy the object]
 static void SomeStruct_destroy(void* self_p)
 {
     // NOTE: when using this library, provide this but do not call this.
     return free(self_p);
 }
+//! [User-defined callback for the library to destroy the object]
 
-// MANDATORY: user must provide an wrapper function to release (not a callback).
+//! [User-defined function to enable proper release]
 static void SomeStruct_release(struct SomeStruct* self_p)
 {
     return PoolSlot_release(self_p->slot_p);
 }
+//! [User-defined function to enable proper release]
 
+//! [Main function]
 int main()
 {
     const size_t             pool_capacity = 100U;
@@ -53,3 +58,4 @@ int main()
 
     return 0;
 }
+//! [Main function]
