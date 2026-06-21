@@ -18,6 +18,7 @@ build:
       html:
         - cmake -S . -B build
         - cmake --build build --target doxygen
+        - rm -rf $READTHEDOCS_OUTPUT/build/doc/html
         - mkdir -p $READTHEDOCS_OUTPUT/build/doc/html
         - cp -rf build/doc/html $READTHEDOCS_OUTPUT
 
