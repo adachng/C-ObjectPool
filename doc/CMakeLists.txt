@@ -40,9 +40,6 @@ set(DOXYGEN_HTML_COLORSTYLE "TOGGLE")
 # Root README.md as main page:
 set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${PROJECT_SOURCE_DIR}/README.md")
 
-# Output directory preference:
-set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-
 doxygen_add_docs(doxygen
     ${PROJECT_SOURCE_DIR}/README.md # needed for DOXYGEN_USE_MDFILE_AS_MAINPAGE
     ${PROJECT_SOURCE_DIR}/src
