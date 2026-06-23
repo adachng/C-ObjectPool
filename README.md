@@ -6,6 +6,10 @@ user-defined objects without any `malloc()` call past the pool's initialisation 
 This library requires user-provided function callbacks that manage the lifecycle of a user-defined object,
 and in turn shifts all `malloc()` calls to take place during the object pool's initialisation.
 
+## Documentation
+
+Work-in-progress: https://github.com/adachng/C-ObjectPool/tree/rtd_test
+
 ## Table of Contents
 
 - [Installation](#installation)
