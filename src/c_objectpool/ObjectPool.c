@@ -27,7 +27,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-struct poolStateFlyweight
+static struct poolStateFlyweight
 {
     struct ObjectPoolOptArgs optional_callbacks;
     void                     (*obj_destroy_cb)(void* self_p);
@@ -35,7 +35,7 @@ struct poolStateFlyweight
     size_t             ref_count;
 };
 
-struct ObjectPool
+static struct ObjectPool
 {
     struct poolStateFlyweight* shared_prop_p;
     struct PoolSlot*           head_p;
@@ -44,7 +44,7 @@ struct ObjectPool
     size_t size;
 };
 
-struct PoolSlot
+static struct PoolSlot
 {
     struct poolStateFlyweight* shared_prop_p;
     void*                      pooled_obj_p;
